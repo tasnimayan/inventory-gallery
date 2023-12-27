@@ -1,0 +1,38 @@
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: none;
+}
+
+section,
+header {
+  padding: 60px 40px 60px 80px;
+}
+
+.active {
+  color: #ee8a38 !important;
+  text-shadow: 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@media only screen and (max-width: 576px) {
+  section,
+  header {
+    padding: 40px 20px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  section,
+  header {
+    padding: 60px 40px;
+  }
+}
+
+/* Tablet or moderated screen device design */
+@media only screen and (max-width: 992px) {
+  section,
+  header {
+    padding: 60px 40px;
+  }
+}
