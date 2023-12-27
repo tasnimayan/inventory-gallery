@@ -4,7 +4,7 @@ const NavBar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light" style={{backgroundColor: "#e3f2fd",fontSize:"18px", fontFamily:"Poppins"}}>
       <div className="container-fluid px-lg-5">
-        <a href="#root" className="navbar-brand">TubaTrims</a>
+        <a href="/" className="navbar-brand">TubaTrims</a>
         <button type="button" className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse9">
           <span className="navbar-toggler-icon"></span>
         </button>

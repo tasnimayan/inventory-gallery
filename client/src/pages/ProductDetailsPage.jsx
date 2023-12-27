@@ -1,42 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { DeleteProduct, getProductDetails } from '../api/services';
+import UpdateForm from '../components/UpdateForm';
 
 const ProductDetailsPage = () => {
-  const productId = useParams();
-  const [product, setProduct] = useState()
+  const {productId} = useParams();
+  const [product, setProduct] = useState({_id:'', title:'', description:'',categoryId:'',status:'',manufacturer:'',images:[]})
 
   useEffect(()=>{
-    // Make api request using productId and set to product
+    getProductDetails(productId)
+    .then((response) => {
+      setProduct(response.data.data)
+    }).catch((err)=>{
+      console.log(err)
+    })
   },[])
-  const image = 'https://lapco.co.nz/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/0/b/0bd238e8c636a6d22d904c3aad1eb29d8a95ca72_1.jpg'
+
+  const getProduct = ()=>{
+    return product
+  }
+
+  const DeleteItem =(productId)=>{
+    DeleteProduct(productId)
+      .then((response)=>{
+        console.log("successful")
+      })
+      .catch((err)=>{
+        console.log(err)
+      })
+  }
+
   return (
     <section className="py-5">
       <div className="container">
         <div className="row gx-5">
           <aside className="col-lg-6">
-            <div className="border rounded-4 mb-3 d-flex justify-content-center">
-              <a className="rounded-4" data-type="image" href='/'>
-                <img style={{maxWidth: "100%", maxHeight: "100vh", margin: "auto"}} className="rounded-4 fit" src={image} alt='images'/>
-              </a>
+            <div className="border rounded-4 mb-3 d-flex justify-content-center" style={{height:"400px"}}>
+              <img style={{maxWidth: "100%", maxHeight: "100%", }} className="rounded-4 object-fit-cover" src={product.images[0]?product.images[0]:'/placeholder.jpg'} alt='images'/>
             </div>
             <div className="d-flex justify-content-center mb-3">
-              <a className="border mx-1 rounded-2 item-thumb" data-type="image" href="#root">
-                <img width="60" height="60" className="rounded-2" src={image} alt='Images'/>
-              </a>
-              <a className="border mx-1 rounded-2 item-thumb" data-type="image" href="#root">
-                <img width="60" height="60" className="rounded-2" src={image} alt='images'/>
-              </a>
-              <a className="border mx-1 rounded-2 item-thumb" data-type="image" href="#root">
-                <img width="60" height="60" className="rounded-2" src={image} alt='images'/>
-              </a>
-
+              {product.images.map((img, index)=>{
+                return(
+                  <a className="border mx-1 rounded-2 item-thumb" data-type="image" href="#root" key={index}>
+                    <img width="60" height="60" className="rounded-2" src={img} alt='Images'/>
+                  </a>)
+              })}
             </div>
 
           </aside>
           <main className="col-lg-6">
             <div className="ps-lg-3">
               <h4 className="title text-dark">
-                FULL BELT BUCKLE 38MM (SATIN NICKEL) Center Bar 55 x 35mm Silver Color
+               {product.title}
               </h4>
 
               <div className="mb-3">
@@ -45,26 +60,25 @@ const ProductDetailsPage = () => {
               </div>
 
               <p>
-              Hardware items are measured by internal diameter, with the measurement indicating what width strap or webbing they can accommodate (for our hardware straps are generally 2-4mm thick).
+                {product.description}
               </p>
 
               <div className="row">
                 <dt className="col-3">Category:</dt>
-                <dd className="col-9">Buckle</dd>
+                <dd className="col-9">{product.categoryId?.categoryName}</dd>
 
                 <dt className="col-3">Color</dt>
                 <dd className="col-9">Brown</dd>
 
                 <dt className="col-3">Manufacturer</dt>
-                <dd className="col-9">Hasan Metal</dd>
-
-                <dt className="col-3">Brand</dt>
-                <dd className="col-9">Reebook</dd>
+                <dd className="col-9">{product.manufacturer}</dd>
               </div>
 
               <hr />
 
-              <a href="/" className="btn btn-primary shadow-0 float-end px-4"> Edit </a>
+              <button className="btn btn-danger shadow-0 float-end px-4 ms-2" onClick={DeleteItem.bind(this, product._id)}> Delete </button>
+
+              <UpdateForm getProduct={getProduct}/>
             </div>
           </main>
         </div>

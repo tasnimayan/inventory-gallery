@@ -37,27 +37,29 @@ export  async function getAllProducts(){
   }
   
 }
-
+// Complete
 export  async function getProductDetails(productId){
-  let URL = 'api/products/'+productId  //get
+  let URL = 'http://localhost:8000/api/products/'+productId  //get
 
-  try{
-    const response = await fetch(URL, {
-      method: "GET",
-      mode: " same-origin",
+  try {
+    const response = await axios.get(URL, {
       headers: {
-        "Content-Type": "application/json",
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
-    return response.json();
-  }
-  catch(err){
-    console.log(err)
-    return err.message
+
+    if (response.status === 200) {
+      return response;
+    } else {
+      throw new Error(response.data.message);
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 }
 
+// complete
 export  async function createProduct(product){
   let URL = '/api/products'   //post
 
@@ -83,40 +85,42 @@ export  async function createProduct(product){
 export  async function updateProduct(productId, updatedData){
   let URL = '/api/products/'+productId  // post
 
-  try{
-    const response = await fetch(URL, {
-      method: "POST",
-      mode: " same-origin",
+  try {
+    const response = await axios.post(URL, updatedData,{
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
       },
-      body: JSON.stringify(updatedData)
-
     });
-    return response.json();
-  }
-  catch(err){
-    console.log(err)
-    return err.message
+
+    if (response.status === 200) {
+      return response;
+    } else {
+      throw new Error(response.data.message);
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 }
 
+// complete
 export  async function DeleteProduct(productId){
-  let URL = 'api/products/'+productId  //delete
-  try{
-    const response = await fetch(URL, {
-      method: "DELETE",
-      mode: " same-origin",
+  let URL = '/api/products/'+productId  //delete
+  try {
+    const response = await axios.delete(URL, {
       headers: {
-        "Content-Type": "application/json",
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
-    return response.json();
-  }
-  catch(err){
-    console.log(err)
-    return err.message
+
+    if (response.status === 200) {
+      return response;
+    } else {
+      throw new Error(response.data.message);
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 }
 

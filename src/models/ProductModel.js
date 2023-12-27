@@ -6,8 +6,8 @@ const productSchema = new mongoose.Schema({
   images: [String],
   manufacturer: {type:String}, 
   categoryId: {
-    type:mongoose.Schema.ObjectId,
-    ref:"CategoryModel",
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"categories",
     required:true
   },
 },{

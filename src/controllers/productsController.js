@@ -26,8 +26,6 @@ exports.getAllProducts = async (req, res)=> {
 // Creating New product
 exports.createProduct = async (req, res) => {
   let photos;
-  console.log(req.body)
-  console.log(req.files)
 
   if(req.files){
     photos = req.files.map(item => item.path.replace(/\\/g,'/').slice(6));
@@ -56,7 +54,7 @@ exports.createProduct = async (req, res) => {
 // Get Tour details with specific TourID
 exports.getProductDetails = async (req, res)=>{
   try {
-    const product = await ProductModel.findById(req.params.productId).populate({path: 'category',select: '-createdAt -updatedAt -_id'});
+    const product = await ProductModel.findById(req.params.productId).populate({path: 'categoryId',select: '-createdAt -updatedAt -_id'});
 
     if (!product) {
       return res.status(404).send({ message: 'No data found', data:{}});
@@ -77,7 +75,7 @@ exports.updateProduct = async (req, res) =>{
       photos = req.files.map(item => item.path.replace(/\\/g,'/').slice(6));
     }
 
-    const updateFields = ["title", "description", "category", "status", "manufacturer"]  
+    const updateFields = ["title", "description", "categoryId", "status", "manufacturer"]  
 
     const product = await ProductModel.findOne({_id:productId});
     
@@ -87,7 +85,7 @@ exports.updateProduct = async (req, res) =>{
     
     for(key in req.body){
       if(updateFields.includes(key)){
-        product[key] = req.body.key;
+        product[key] = req.body[key];
       }
     }
 
@@ -96,6 +94,7 @@ exports.updateProduct = async (req, res) =>{
 
     res.status(200).send({ message: 'Product updated!', data:product });
   } catch (err) {
+    console.log(err)
     res.status(400).send(err.message);
   }
 }
@@ -131,46 +130,42 @@ exports.getByCategory = async (req, res) =>{
   }
 }
 
+// Modify for searching functionality
+exports.searchProduct = async (req, res) => {
 
-exports.getQueriedTours = async (req, res) => {
-  const queryString = { ...req.query };
-
-  // exclude everything other than match field -> later chain methods on found document
-  ['page', 'sort', 'limit', 'fields', 'skip'].forEach(
-    el => delete queryString[el]
-  );
-
-  //regEx filtering with >, =>, <, =<
-  let match = JSON.stringify(queryString);
-  match = match.replace(/\b(gt|gte|lt|lte)\b/g, match => `$${match}`);
+  let queryString = req.query.search || ''
+  
+  const PAGE_SIZE = 2;
+  const page = req.query.page || 1;
+  const limit = req.query.limit || PAGE_SIZE;
+  const skip = (page - 1) * PAGE_SIZE || 0;
 
   try{
     //get the matched documents from db
-    let QUERIES = Tour.find(JSON.parse(match));
+    let matchStage = {
+      $match:{
+        $or:[
+          {"title":{$regex:".*"+searchLocation+".*", $options:"i"}}, 
+          {"description":{$regex:".*"+searchLocation+".*", $options:"i"}}
+        ]
+      }
+      }
 
-    // Chain  methods
+    let data = await ProductModel.aggregate([
+      matchStage,
+      {$skip:skip},
+      {$limit:limit}
+    ])
 
+    let count = await ProductModel.aggregate([ matchStage]).count()
 
-    const sort = req.query.sort || {};
-
-    //* PAGINATION
-
-    const PAGE_SIZE = 5;
-    const page = req.query.page || 1;
-    const limit = req.query.limit || PAGE_SIZE;
-    const skip = (page - 1) * PAGE_SIZE || 0;
-
-    //resolve the promise and finish query
-    const result = await QUERIES.skip(skip).limit(limit).sort(sort);
-
-    if (result.length === 0) {
-      return res.status(200).send({ message: 'No results match this query' });
+    if (data.length === 0) {
+      return res.status(404).send({ message: 'No results match this query' });
     }
-    res.status(200).send({ results: tours.length, result });
+    res.status(200).send({ totalPages:Math.ceil(count/limit), data:data });
 
   } catch (err) {
     res.status(400).send(err.message);
   }
 }
-
 
